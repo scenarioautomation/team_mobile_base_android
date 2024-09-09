@@ -8,7 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.scenarioautomation.embrace.team_mobile_base_android.R
+import com.scenarioautomation.embrace.team_mobile_base_android.features.project.add.AddProjectFragment
 import kotlinx.coroutines.launch
 
 class ProjectsFragment : Fragment() {
@@ -31,6 +33,15 @@ class ProjectsFragment : Fragment() {
         val rvProjects = view.findViewById<RecyclerView>(R.id.rvProjects)
         viewLifecycleOwner.lifecycleScope.launch {
             rvProjects.adapter = ProjectsAdapter(viewModel.listProjects())
+        }
+
+        view.findViewById<FloatingActionButton>(R.id.btnAddProject).setOnClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .add(R.id.flContent, AddProjectFragment.newInstance(), null)
+                .hide(this)
+                .addToBackStack(null)
+                .commit()
         }
     }
 }
