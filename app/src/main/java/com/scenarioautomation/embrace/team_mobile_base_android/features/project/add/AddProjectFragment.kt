@@ -15,8 +15,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.snackbar.Snackbar
 import com.scenarioautomation.embrace.team_mobile_base_android.R
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class AddProjectFragment : Fragment() {
 
     companion object {
