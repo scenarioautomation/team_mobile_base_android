@@ -11,8 +11,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.scenarioautomation.embrace.team_mobile_base_android.R
 import com.scenarioautomation.embrace.team_mobile_base_android.features.project.add.AddProjectFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class ProjectsFragment : Fragment() {
 
     companion object {

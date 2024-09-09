@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.scenarioautomation.embrace.team_mobile_base_android.service.ProjectDataService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,9 +22,11 @@ class AddProjectViewModel @Inject constructor(private val projectDataService: Pr
             _state.value = AddProjectState.ERROR
             return
         }
-        viewModelScope.launch(Dispatchers.IO) {
-            projectDataService.saveNewProject(name, photoUri)
-            _state.postValue(AddProjectState.SUCCESS)
+        _state.value = AddProjectState.SALVING
+        viewModelScope.launch {
+            _state.value =
+                if (projectDataService.saveNewProject(name, photoUri) != null)
+                    AddProjectState.SUCCESS else AddProjectState.ERROR
         }
     }
 }

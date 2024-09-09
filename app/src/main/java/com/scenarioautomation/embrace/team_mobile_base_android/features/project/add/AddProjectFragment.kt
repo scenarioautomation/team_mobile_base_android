@@ -72,6 +72,7 @@ class AddProjectFragment : Fragment() {
         viewModel.state.observe(viewLifecycleOwner) {
             when (it) {
                 AddProjectState.ERROR -> {
+                    btnSave.isEnabled = true
                     Snackbar.make(
                         btnSave,
                         getString(R.string.invalid_parameter),
@@ -81,6 +82,10 @@ class AddProjectFragment : Fragment() {
 
                 AddProjectState.SUCCESS -> {
                     parentFragmentManager.popBackStack()
+                }
+
+                AddProjectState.SALVING -> {
+                    btnSave.isEnabled = false
                 }
 
                 else -> {
