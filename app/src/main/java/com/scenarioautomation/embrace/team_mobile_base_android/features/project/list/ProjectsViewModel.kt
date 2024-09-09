@@ -1,4 +1,4 @@
-package com.scenarioautomation.embrace.team_mobile_base_android.features.project
+package com.scenarioautomation.embrace.team_mobile_base_android.features.project.list
 
 import androidx.lifecycle.ViewModel
 import com.scenarioautomation.embrace.team_mobile_base_android.domain.Project
