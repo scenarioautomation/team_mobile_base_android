@@ -19,10 +19,11 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        supportFragmentManager
-            .beginTransaction()
-            .add(R.id.flContent, ProjectsFragment.newInstance(), null)
-            .addToBackStack(null)
-            .commit()
+        if (supportFragmentManager.backStackEntryCount == 0)
+            supportFragmentManager
+                .beginTransaction()
+                .add(R.id.flContent, ProjectsFragment.newInstance(), null)
+                .addToBackStack(null)
+                .commit()
     }
 }
