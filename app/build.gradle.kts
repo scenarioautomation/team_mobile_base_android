@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
     implementation(libs.gson)
+    implementation(libs.glide)
 }
 
 kapt {

@@ -13,6 +13,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.scenarioautomation.embrace.team_mobile_base_android.R
 import dagger.hilt.android.AndroidEntryPoint
@@ -38,7 +39,11 @@ class AddProjectFragment : Fragment() {
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 uri?.let {
                     currentPhotoUri = uri
-                    ivPhotoPreview?.setImageURI(it)
+                    ivPhotoPreview?.let {
+                        Glide.with(this)
+                            .load(uri)
+                            .into(it)
+                    }
                 }
             }
     }

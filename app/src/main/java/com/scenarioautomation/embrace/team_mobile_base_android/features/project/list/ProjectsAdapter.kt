@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.scenarioautomation.embrace.team_mobile_base_android.R
 
 class ProjectsAdapter : RecyclerView.Adapter<ProjectsAdapter.ProjectViewHolder>() {
@@ -29,7 +30,9 @@ class ProjectsAdapter : RecyclerView.Adapter<ProjectsAdapter.ProjectViewHolder>(
     override fun onBindViewHolder(holder: ProjectViewHolder, position: Int) {
         val project = projects[position]
         holder.tvName.text = project.name
-        holder.ivPhoto.setImageURI(project.image)
+        Glide.with(holder.itemView.context)
+            .load(project.image)
+            .into(holder.ivPhoto)
     }
 
     fun updateProjects(projects: List<ProjectItemDTO>) {
