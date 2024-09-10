@@ -5,11 +5,14 @@ import android.net.Uri
 import androidx.core.net.toUri
 import com.scenarioautomation.embrace.team_mobile_base_android.domain.Project
 import com.scenarioautomation.embrace.team_mobile_base_android.domain.Projects
+import com.scenarioautomation.embrace.team_mobile_base_android.features.project.list.ProjectItemDTO
 import com.scenarioautomation.embrace.team_mobile_base_android.utils.getFileFromURI
 import com.scenarioautomation.embrace.team_mobile_base_android.utils.readAll
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
@@ -23,31 +26,18 @@ class ProjectDataService @Inject constructor(
     private val jsonService: JsonService
 ) {
 
-    private var completableProjects: CompletableDeferred<List<Project>>? = null
+    private var completableProjects: CompletableDeferred<MutableList<Project>>? = null
+
+    private var projectsFlow = MutableStateFlow<List<ProjectItemDTO>>(listOf())
 
     companion object {
         private const val PHOTOS_FOLDER = "PHOTOS"
         private const val PROJECTS_FILE = "projects.json"
     }
 
-    suspend fun getProjects(): List<Project> {
-        completableProjects?.let {
-            return it.await()
-        }
-        completableProjects = CompletableDeferred()
-        val json = withContext(Dispatchers.IO) {
-            try {
-                val projectsFile = FileInputStream(File((appContext.filesDir), PROJECTS_FILE))
-                return@withContext String(projectsFile.readAll(), Charsets.UTF_8)
-            } catch (e: Throwable) {
-                return@withContext ""
-            }
-        }
-
-        val projects =
-            (jsonService.parseFromJson<Projects>(json)?.projects ?: listOf()).sortedBy { it.id }
-        completableProjects?.complete(projects)
-        return projects
+    suspend fun listenProjects(): Flow<List<ProjectItemDTO>> {
+        notifyProjects(getProjects())
+        return projectsFlow
     }
 
     suspend fun saveNewProject(name: String, photo: Uri): Boolean {
@@ -79,10 +69,45 @@ class ProjectDataService @Inject constructor(
                 false
             }
         }
-        return saveProjectsSuccess
+        if (!saveProjectsSuccess) return false
+
+        completableProjects?.await()?.let {
+            it.clear()
+            it.addAll(newProjects.projects)
+        }
+
+        notifyProjects(newProjects.projects)
+
+        return true
     }
 
-    fun getImageURI(project: Project): Uri {
-        return File(File(appContext.filesDir, PHOTOS_FOLDER), "${project.id}.img").toUri()
+    private suspend fun getProjects(): List<Project> {
+        completableProjects?.let {
+            return it.await()
+        }
+        completableProjects = CompletableDeferred()
+        val json = withContext(Dispatchers.IO) {
+            try {
+                val projectsFile = FileInputStream(File((appContext.filesDir), PROJECTS_FILE))
+                return@withContext String(projectsFile.readAll(), Charsets.UTF_8)
+            } catch (e: Throwable) {
+                return@withContext ""
+            }
+        }
+
+        val projects =
+            (jsonService.parseFromJson<Projects>(json)?.projects ?: listOf()).sortedBy { it.id }
+        completableProjects?.complete(projects.toMutableList())
+
+        return projects
+    }
+
+    private suspend fun notifyProjects(projects: List<Project>) {
+        projectsFlow.emit(projects.map {
+            ProjectItemDTO(
+                it.name,
+                File(File(appContext.filesDir, PHOTOS_FOLDER), "${it.id}.img").toUri()
+            )
+        })
     }
 }

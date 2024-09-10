@@ -8,8 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.scenarioautomation.embrace.team_mobile_base_android.R
 
-class ProjectsAdapter(private val projects: List<ProjectItemDTO>) :
-    RecyclerView.Adapter<ProjectsAdapter.ProjectViewHolder>() {
+class ProjectsAdapter : RecyclerView.Adapter<ProjectsAdapter.ProjectViewHolder>() {
+    private val projects = mutableListOf<ProjectItemDTO>()
 
     inner class ProjectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tvName)
@@ -30,5 +30,23 @@ class ProjectsAdapter(private val projects: List<ProjectItemDTO>) :
         val project = projects[position]
         holder.tvName.text = project.name
         holder.ivPhoto.setImageURI(project.image)
+    }
+
+    fun updateProjects(projects: List<ProjectItemDTO>) {
+        val currentSize = this.projects.size
+        val newSize = projects.size
+        val dif = newSize - currentSize
+
+        this.projects.clear()
+        this.projects.addAll(projects)
+
+        if (dif > 0) {
+            notifyItemRangeChanged(0, currentSize)
+            notifyItemRangeInserted(currentSize, dif)
+        } else if (dif < 0) {
+            notifyItemRangeChanged(0, newSize)
+            notifyItemRangeRemoved(newSize, dif * -1)
+        } else
+            notifyItemRangeChanged(0, newSize)
     }
 }

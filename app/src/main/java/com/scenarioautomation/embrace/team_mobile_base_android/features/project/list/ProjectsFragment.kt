@@ -33,9 +33,9 @@ class ProjectsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val rvProjects = view.findViewById<RecyclerView>(R.id.rvProjects)
-        viewLifecycleOwner.lifecycleScope.launch {
-            rvProjects.adapter = ProjectsAdapter(viewModel.listProjects())
-        }
+
+        val projectsAdapter = ProjectsAdapter()
+        rvProjects.adapter = projectsAdapter
 
         view.findViewById<FloatingActionButton>(R.id.btnAddProject).setOnClickListener {
             parentFragmentManager
@@ -44,6 +44,12 @@ class ProjectsFragment : Fragment() {
                 .hide(this)
                 .addToBackStack(null)
                 .commit()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.listenProjects().collect {
+                projectsAdapter.updateProjects(it)
+            }
         }
     }
 }
