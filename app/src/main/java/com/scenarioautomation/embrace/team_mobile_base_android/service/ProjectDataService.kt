@@ -33,6 +33,7 @@ class ProjectDataService @Inject constructor(
     companion object {
         private const val PHOTOS_FOLDER = "PHOTOS"
         private const val PROJECTS_FILE = "projects.json"
+        private const val IMAGE_NAME = "%s.img"
     }
 
     suspend fun listenProjects(): Flow<List<ProjectItemDTO>> {
@@ -48,7 +49,10 @@ class ProjectDataService @Inject constructor(
         val copyImageSuccess = withContext(Dispatchers.IO) {
             try {
                 originFile.copyTo(
-                    File(File(appContext.filesDir, PHOTOS_FOLDER), "$nextId.img"),
+                    File(
+                        File(appContext.filesDir, PHOTOS_FOLDER),
+                        String.format(IMAGE_NAME, nextId)
+                    ),
                     true
                 )
                 true
@@ -106,7 +110,10 @@ class ProjectDataService @Inject constructor(
         projectsFlow.emit(projects.map {
             ProjectItemDTO(
                 it.name,
-                File(File(appContext.filesDir, PHOTOS_FOLDER), "${it.id}.img").toUri()
+                File(
+                    File(appContext.filesDir, PHOTOS_FOLDER),
+                    String.format(IMAGE_NAME, it.id)
+                ).toUri()
             )
         })
     }

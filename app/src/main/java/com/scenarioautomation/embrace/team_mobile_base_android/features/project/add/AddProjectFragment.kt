@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.scenarioautomation.embrace.team_mobile_base_android.R
 import dagger.hilt.android.AndroidEntryPoint
@@ -68,7 +69,7 @@ class AddProjectFragment : Fragment() {
             )
         }
 
-        val btnSave = view.findViewById<Button>(R.id.btnSave).apply {
+        val btnSave = view.findViewById<FloatingActionButton>(R.id.btnSave).apply {
             setOnClickListener {
                 viewModel.addProject(etName.text.toString(), currentPhotoUri)
             }
