@@ -2,6 +2,7 @@ package com.scenarioautomation.embrace.team_mobile_base_android.service
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import com.scenarioautomation.embrace.team_mobile_base_android.domain.Project
 import com.scenarioautomation.embrace.team_mobile_base_android.domain.Projects
 import com.scenarioautomation.embrace.team_mobile_base_android.utils.getFileFromURI
@@ -81,4 +82,7 @@ class ProjectDataService @Inject constructor(
         return saveProjectsSuccess
     }
 
+    fun getImageURI(project: Project): Uri {
+        return File(File(appContext.filesDir, PHOTOS_FOLDER), "${project.id}.img").toUri()
+    }
 }
