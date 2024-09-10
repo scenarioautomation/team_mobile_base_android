@@ -87,6 +87,11 @@ class AddProjectFragment : Fragment() {
                 }
 
                 AddProjectState.SUCCESS -> {
+                    Snackbar.make(
+                        btnSave,
+                        getString(R.string.record_success),
+                        Snackbar.LENGTH_LONG
+                    ).show()
                     parentFragmentManager.popBackStack()
                 }
 
