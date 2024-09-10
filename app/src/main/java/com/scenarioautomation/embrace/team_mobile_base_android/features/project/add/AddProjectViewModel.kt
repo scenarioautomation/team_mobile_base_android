@@ -19,13 +19,13 @@ class AddProjectViewModel @Inject constructor(private val projectDataService: Pr
 
     fun addProject(name: String?, photoUri: Uri?) {
         if ((name?.isBlank() != false) || (photoUri == null)) {
-            _state.value = AddProjectState.ERROR
+            _state.value = AddProjectState.INVALID_PARAMS
             return
         }
         _state.value = AddProjectState.SALVING
         viewModelScope.launch {
             _state.value =
-                if (projectDataService.saveNewProject(name, photoUri) != null)
+                if (projectDataService.saveNewProject(name, photoUri))
                     AddProjectState.SUCCESS else AddProjectState.ERROR
         }
     }

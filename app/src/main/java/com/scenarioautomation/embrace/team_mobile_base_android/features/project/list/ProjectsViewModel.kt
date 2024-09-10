@@ -10,6 +10,6 @@ import javax.inject.Inject
 class ProjectsViewModel @Inject constructor(private val projectDataService: ProjectDataService) :
     ViewModel() {
     suspend fun listProjects(): List<Project> {
-        return projectDataService.loadProjects()
+        return projectDataService.getProjects()
     }
 }

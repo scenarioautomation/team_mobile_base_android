@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,39 +22,63 @@ class ProjectDataService @Inject constructor(
     private val jsonService: JsonService
 ) {
 
-    private var completableProjects: CompletableDeferred<MutableList<Project>>? = null
-
+    private var completableProjects: CompletableDeferred<List<Project>>? = null
 
     companion object {
         private const val PHOTOS_FOLDER = "PHOTOS"
         private const val PROJECTS_FILE = "projects.json"
     }
 
-    suspend fun loadProjects(): MutableList<Project> {
+    suspend fun getProjects(): List<Project> {
         completableProjects?.let {
             return it.await()
         }
         completableProjects = CompletableDeferred()
-        return withContext(Dispatchers.IO) {
+        val json = withContext(Dispatchers.IO) {
             try {
                 val projectsFile = FileInputStream(File((appContext.filesDir), PROJECTS_FILE))
-                val projectsJson = String(projectsFile.readAll(), Charsets.UTF_8)
-                val projects =
-                    jsonService.parseFromJson<Projects>(projectsJson)?.projects ?: mutableListOf()
-                completableProjects?.complete(projects)
-                return@withContext projects
+                return@withContext String(projectsFile.readAll(), Charsets.UTF_8)
             } catch (e: Throwable) {
-                return@withContext mutableListOf()
+                return@withContext ""
             }
         }
+
+        val projects =
+            (jsonService.parseFromJson<Projects>(json)?.projects ?: listOf()).sortedBy { it.id }
+        completableProjects?.complete(projects)
+        return projects
     }
 
-    suspend fun saveNewProject(name: String, photo: Uri): Project? {
-        return withContext(Dispatchers.IO) {
-            val originFile = photo.getFileFromURI(appContext) ?: return@withContext null
-            originFile.copyTo(File(File(appContext.filesDir, PHOTOS_FOLDER), "1.img"), true)
-            Project(1, name, "1.img")
+    suspend fun saveNewProject(name: String, photo: Uri): Boolean {
+        val projects = getProjects()
+        val nextId = (projects.lastOrNull()?.id ?: 0) + 1
+
+        val originFile = photo.getFileFromURI(appContext) ?: return false
+        val copyImageSuccess = withContext(Dispatchers.IO) {
+            try {
+                originFile.copyTo(
+                    File(File(appContext.filesDir, PHOTOS_FOLDER), "$nextId.img"),
+                    true
+                )
+                true
+            } catch (_: Throwable) {
+                false
+            }
         }
+        if (!copyImageSuccess) return false
+
+        val newProjects = Projects(projects + listOf(Project(nextId, name)))
+        val json = jsonService.parseToJson(newProjects) ?: return false
+        val saveProjectsSuccess = withContext(Dispatchers.IO) {
+            try {
+                val projectsFile = FileOutputStream(File((appContext.filesDir), PROJECTS_FILE))
+                projectsFile.write(json.toByteArray(Charsets.UTF_8))
+                true
+            } catch (_: Throwable) {
+                false
+            }
+        }
+        return saveProjectsSuccess
     }
 
 }

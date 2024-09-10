@@ -8,4 +8,5 @@
     <string name="select_photo">Selecionar foto</string>
     <string name="add">Adicionar</string>
     <string name="invalid_parameter">Parâmetro inválido</string>
+    <string name="record_fail">Erro para salvar</string>
 </resources>
