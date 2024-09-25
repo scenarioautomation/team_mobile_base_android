@@ -6,7 +6,6 @@ import androidx.core.net.toUri
 import com.scenarioautomation.embrace.team_mobile_base_android.domain.Project
 import com.scenarioautomation.embrace.team_mobile_base_android.domain.Projects
 import com.scenarioautomation.embrace.team_mobile_base_android.features.project.list.ProjectItemDTO
-import com.scenarioautomation.embrace.team_mobile_base_android.utils.getFileFromURI
 import com.scenarioautomation.embrace.team_mobile_base_android.utils.readAll
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
@@ -45,18 +44,30 @@ class ProjectDataService @Inject constructor(
         val projects = getProjects()
         val nextId = (projects.lastOrNull()?.id ?: 0) + 1
 
-        val originFile = photo.getFileFromURI(appContext) ?: return false
         val copyImageSuccess = withContext(Dispatchers.IO) {
             try {
-                originFile.copyTo(
-                    File(
-                        File(appContext.filesDir, PHOTOS_FOLDER),
-                        String.format(IMAGE_NAME, nextId)
-                    ),
-                    true
-                )
+                val photosFolder = File(appContext.filesDir, PHOTOS_FOLDER)
+                photosFolder.mkdirs()
+                val newPhotoFile = File(photosFolder, String.format(IMAGE_NAME, nextId))
+                if (!newPhotoFile.createNewFile()) return@withContext false
+
+                val photoInputStream =
+                    appContext.contentResolver.openInputStream(photo) ?: return@withContext false
+
+                val newPhotoOutputStream = FileOutputStream(newPhotoFile)
+                val buffer = ByteArray(2048)
+                var count = photoInputStream.read(buffer)
+                while (count > 0) {
+                    newPhotoOutputStream.write(buffer.copyOf(count))
+                    newPhotoOutputStream.flush()
+                    count = photoInputStream.read(buffer)
+                }
+
+                newPhotoOutputStream.close()
+                photoInputStream.close()
                 true
-            } catch (_: Throwable) {
+            } catch (e: Throwable) {
+                e.printStackTrace()
                 false
             }
         }
